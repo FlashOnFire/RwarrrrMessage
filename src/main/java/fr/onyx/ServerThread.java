@@ -25,7 +25,10 @@ public class ServerThread extends Thread {
 
             while (!socket.isClosed()) {
                 String line = in.readLine();
-                if (line.startsWith("pseudo:")) {
+                if (line == null) {
+                    MainServer.clients.remove(this);
+                    break;
+                } else if (line.startsWith("pseudo:")) {
                     if (pseudo == null) {
                         pseudo = line.substring(7);
                         MainServer.broadcast("Server", pseudo + " s'est connecté !");
@@ -33,10 +36,13 @@ public class ServerThread extends Thread {
                     }
                 } else if (line.startsWith("message:")) {
                     MainServer.broadcast(pseudo, line.substring(8));
+                } else if (line.equals("quit")) {
+                    MainServer.clients.remove(this);
+                    break;
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            MainServer.clients.remove(this);
         }
     }
 }
